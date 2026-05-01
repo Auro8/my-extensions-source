@@ -1,6 +1,5 @@
 ext {
-    extName = 'Z-Library'
-    pkgNameSuffix = 'en.zlibrary'
+    extName = 'ZLibrary'
     extClass = '.ZLibrary'
     extVersionCode = 1
     isNsfw = false
