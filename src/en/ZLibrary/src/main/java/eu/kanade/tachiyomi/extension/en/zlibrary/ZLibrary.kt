@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
-import okhttp3.Request
 import okhttp3.Response
 import org.jsoup.Jsoup
 
@@ -20,8 +19,7 @@ class ZLibrary : HttpSource() {
         .add("Referer", baseUrl)
         .add("User-Agent", "Mozilla/5.0 (Android 14; Mobile) AppleWebKit/537.36")
 
-    override fun popularMangaRequest(page: Int) =
-        GET("$baseUrl/popular?page=$page", headers)
+    override fun popularMangaRequest(page: Int) = GET("$baseUrl/popular?page=$page", headers)
 
     override fun popularMangaParse(response: Response): MangasPage {
         val doc = Jsoup.parse(response.body.string())
@@ -39,13 +37,11 @@ class ZLibrary : HttpSource() {
         return MangasPage(books, hasNext)
     }
 
-    override fun latestUpdatesRequest(page: Int) =
-        GET("$baseUrl/s/?order=date&page=$page", headers)
+    override fun latestUpdatesRequest(page: Int) = GET("$baseUrl/s/?order=date&page=$page", headers)
 
     override fun latestUpdatesParse(response: Response) = popularMangaParse(response)
 
-    override fun searchMangaRequest(page: Int, query: String, filters: FilterList) =
-        GET("$baseUrl/s/?q=${query.trim()}&page=$page", headers)
+    override fun searchMangaRequest(page: Int, query: String, filters: FilterList) = GET("$baseUrl/s/?q=${query.trim()}&page=$page", headers)
 
     override fun searchMangaParse(response: Response) = popularMangaParse(response)
 
@@ -69,11 +65,13 @@ class ZLibrary : HttpSource() {
     override fun chapterListParse(response: Response): List<SChapter> {
         val doc = Jsoup.parse(response.body.string())
         val title = doc.selectFirst("h1[itemprop=name]")?.text() ?: "Download"
-        return listOf(SChapter.create().apply {
-            name = title
-            setUrlWithoutDomain(response.request.url.toString())
-            chapter_number = 1f
-        })
+        return listOf(
+            SChapter.create().apply {
+                name = title
+                setUrlWithoutDomain(response.request.url.toString())
+                chapter_number = 1f
+            },
+        )
     }
 
     override fun pageListRequest(chapter: SChapter) = GET(baseUrl + chapter.url, headers)
