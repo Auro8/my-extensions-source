@@ -32,7 +32,7 @@ class ZLibrary : HttpSource() {
                 thumbnail_url = el.selectFirst("img")?.attr("abs:src")
                 val href = el.attr("href").ifBlank { el.selectFirst("a")?.attr("href") ?: "" }
                 setUrlWithoutDomain(href)
-                status = SManga.COMPLETE
+                status = 2
             }
         }
         val hasNext = doc.selectFirst("a[rel=next]") != null
@@ -58,7 +58,7 @@ class ZLibrary : HttpSource() {
             description = doc.selectFirst(".book-description-content")?.text()
             genre = doc.select("[itemprop=genre], .property_categories a")
                 .joinToString(", ") { it.text() }
-            status = SManga.COMPLETE
+            status = 2
         }
     }
 
