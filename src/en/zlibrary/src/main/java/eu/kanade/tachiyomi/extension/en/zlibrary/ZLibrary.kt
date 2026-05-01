@@ -1,12 +1,14 @@
 package eu.kanade.tachiyomi.extension.en.zlibrary
 
+import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
-import okhttp3.Headers
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.jsoup.Jsoup
@@ -17,11 +19,11 @@ class ZLibrary : HttpSource() {
     override val lang = "en"
     override val supportsLatest = true
 
-    override fun headersBuilder(): Headers.Builder = Headers.Builder()
-        .add("Referer", baseUrl)
-        .add("User-Agent", "Mozilla/5.0 (Android 14; Mobile) AppleWebKit/537.36")
+    override val client: OkHttpClient = network.cloudflareClient.newBuilder()
+        .rateLimit(2)
+        .build()
 
-    override fun popularMangaRequest(page: Int): Request = Request.Builder().url("$baseUrl/popular?page=$page").headers(headersBuilder().build()).build()
+    override fun popularMangaRequest(page: Int): Request = GET("$baseUrl/popular?page=$page", headers)
 
     override fun popularMangaParse(response: Response): MangasPage {
         val doc = Jsoup.parse(response.body.string())
@@ -39,15 +41,15 @@ class ZLibrary : HttpSource() {
         return MangasPage(books, hasNext)
     }
 
-    override fun latestUpdatesRequest(page: Int): Request = Request.Builder().url("$baseUrl/s/?order=date&page=$page").headers(headersBuilder().build()).build()
+    override fun latestUpdatesRequest(page: Int): Request = GET("$baseUrl/s/?order=date&page=$page", headers)
 
     override fun latestUpdatesParse(response: Response): MangasPage = popularMangaParse(response)
 
-    override fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request = Request.Builder().url("$baseUrl/s/?q=${query.trim()}&page=$page").headers(headersBuilder().build()).build()
+    override fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request = GET("$baseUrl/s/?q=${query.trim()}&page=$page", headers)
 
     override fun searchMangaParse(response: Response): MangasPage = popularMangaParse(response)
 
-    override fun mangaDetailsRequest(manga: SManga): Request = Request.Builder().url(baseUrl + manga.url).headers(headersBuilder().build()).build()
+    override fun mangaDetailsRequest(manga: SManga): Request = GET(baseUrl + manga.url, headers)
 
     override fun mangaDetailsParse(response: Response): SManga {
         val doc = Jsoup.parse(response.body.string())
@@ -62,7 +64,7 @@ class ZLibrary : HttpSource() {
         }
     }
 
-    override fun chapterListRequest(manga: SManga): Request = Request.Builder().url(baseUrl + manga.url).headers(headersBuilder().build()).build()
+    override fun chapterListRequest(manga: SManga): Request = GET(baseUrl + manga.url, headers)
 
     override fun chapterListParse(response: Response): List<SChapter> {
         val doc = Jsoup.parse(response.body.string())
@@ -76,7 +78,7 @@ class ZLibrary : HttpSource() {
         )
     }
 
-    override fun pageListRequest(chapter: SChapter): Request = Request.Builder().url(baseUrl + chapter.url).headers(headersBuilder().build()).build()
+    override fun pageListRequest(chapter: SChapter): Request = GET(baseUrl + chapter.url, headers)
 
     override fun pageListParse(response: Response): List<Page> {
         val doc = Jsoup.parse(response.body.string())
