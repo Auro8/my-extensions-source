@@ -1,5 +1,7 @@
 [
     "en.zlibrary",
     "en.projectgutenberg",
-    "en.standardebooks"
+    "en.standardebooks",
+    "en.openlibrary",
+    "en.oceanofpdf"
 ]
