@@ -17,8 +17,7 @@ class StandardEbooks : HttpSource() {
     override val lang = "en"
     override val supportsLatest = true
 
-    override fun popularMangaRequest(page: Int): Request =
-        GET("$baseUrl/ebooks/?page=$page&sort=downloads", headers)
+    override fun popularMangaRequest(page: Int): Request = GET("$baseUrl/ebooks/?page=$page&sort=downloads", headers)
 
     override fun popularMangaParse(response: Response): MangasPage {
         val doc = Jsoup.parse(response.body.string())
@@ -35,18 +34,15 @@ class StandardEbooks : HttpSource() {
         return MangasPage(books, hasNext)
     }
 
-    override fun latestUpdatesRequest(page: Int): Request =
-        GET("$baseUrl/ebooks/?page=$page&sort=newest", headers)
+    override fun latestUpdatesRequest(page: Int): Request = GET("$baseUrl/ebooks/?page=$page&sort=newest", headers)
 
     override fun latestUpdatesParse(response: Response): MangasPage = popularMangaParse(response)
 
-    override fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request =
-        GET("$baseUrl/ebooks/?query=${query.trim()}&page=$page", headers)
+    override fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request = GET("$baseUrl/ebooks/?query=${query.trim()}&page=$page", headers)
 
     override fun searchMangaParse(response: Response): MangasPage = popularMangaParse(response)
 
-    override fun mangaDetailsRequest(manga: SManga): Request =
-        GET(baseUrl + manga.url, headers)
+    override fun mangaDetailsRequest(manga: SManga): Request = GET(baseUrl + manga.url, headers)
 
     override fun mangaDetailsParse(response: Response): SManga {
         val doc = Jsoup.parse(response.body.string())
@@ -60,8 +56,7 @@ class StandardEbooks : HttpSource() {
         }
     }
 
-    override fun chapterListRequest(manga: SManga): Request =
-        GET(baseUrl + manga.url, headers)
+    override fun chapterListRequest(manga: SManga): Request = GET(baseUrl + manga.url, headers)
 
     override fun chapterListParse(response: Response): List<SChapter> {
         val doc = Jsoup.parse(response.body.string())
@@ -75,8 +70,7 @@ class StandardEbooks : HttpSource() {
         )
     }
 
-    override fun pageListRequest(chapter: SChapter): Request =
-        GET(baseUrl + chapter.url, headers)
+    override fun pageListRequest(chapter: SChapter): Request = GET(baseUrl + chapter.url, headers)
 
     override fun pageListParse(response: Response): List<Page> {
         val doc = Jsoup.parse(response.body.string())
