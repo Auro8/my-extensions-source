@@ -23,7 +23,7 @@ class ZLibrary : HttpSource() {
         .rateLimit(2)
         .build()
 
-    override fun popularMangaRequest(page: Int): Request = GET("$baseUrl/s/?order=popular&page=$page", headers)
+    override fun popularMangaRequest(page: Int): Request = GET("$baseUrl/?page=$page", headers)
 
     override fun popularMangaParse(response: Response): MangasPage {
         val doc = Jsoup.parse(response.body.string())
