@@ -23,21 +23,22 @@ class ZLibrary : HttpSource() {
         .rateLimit(2)
         .build()
 
-    override fun popularMangaRequest(page: Int): Request = GET("$baseUrl/popular?page=$page", headers)
+    override fun popularMangaRequest(page: Int): Request = GET("$baseUrl/s/?order=popular&page=$page", headers)
 
     override fun popularMangaParse(response: Response): MangasPage {
         val doc = Jsoup.parse(response.body.string())
-        val books = doc.select("z-bookcard, .resItemBox").map { el ->
+        val books = doc.select("z-bookcard, .resItemBox, .book-item").map { el ->
             SManga.create().apply {
-                title = el.selectFirst("h3[slot=title], .title, h3")?.text() ?: el.attr("title")
-                author = el.selectFirst("[slot=author], .authors")?.text()
-                thumbnail_url = el.selectFirst("img")?.attr("abs:src")
+                title = el.selectFirst("h3[slot=title], .title, h3, [slot=title]")?.text()
+                    ?: el.attr("title").ifBlank { "Unknown" }
+                author = el.selectFirst("[slot=author], .authors, .author")?.text()
+                thumbnail_url = el.selectFirst("img[slot=cover], img.cover, img")?.attr("abs:src")
                 val href = el.attr("href").ifBlank { el.selectFirst("a")?.attr("href") ?: "" }
                 setUrlWithoutDomain(href)
                 status = 2
             }
         }
-        val hasNext = doc.selectFirst("a[rel=next]") != null
+        val hasNext = doc.selectFirst("a[rel=next], .page-next, a:contains(Next)") != null
         return MangasPage(books, hasNext)
     }
 
@@ -82,7 +83,7 @@ class ZLibrary : HttpSource() {
 
     override fun pageListParse(response: Response): List<Page> {
         val doc = Jsoup.parse(response.body.string())
-        val links = doc.select("a[href*='/dl/'], a.addDownloadedBook")
+        val links = doc.select("a[href*='/dl/'], a.addDownloadedBook, a.btn-primary[href*='download']")
         if (links.isEmpty()) {
             val cover = doc.selectFirst("img.cover")?.attr("abs:src") ?: ""
             return listOf(Page(0, "", cover))
